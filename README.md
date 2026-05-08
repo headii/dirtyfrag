@@ -31,6 +31,11 @@ git clone https://github.com/V4bel/dirtyfrag.git && cd dirtyfrag && gcc -O0 -Wal
 
 This PoC is provided as accurate information following consultation with linux-distros. Do not use it on systems that you are not authorized to test.
 
+## Usage
+
+- `./exp` : Patches `/usr/bin/su` and drops into a root shell.
+- `./exp -c "command"` : Patches `/usr/bin/su` and executes the specified command as root (e.g., `./exp -c "id"`).
+
 ## Cleanup
 
 ⚠️  **Important:** After running this exploit, the page cache is contaminated. To clear the polluted page cache and ensure system stability, either run:
