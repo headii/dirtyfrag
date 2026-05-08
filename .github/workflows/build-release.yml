@@ -1,0 +1,62 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install cross-compilation toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu libc6-dev-arm64-cross binutils-aarch64-linux-gnu
+
+      - name: Build static Linux binaries
+        run: |
+          gcc -O2 -static -Wall -o exp-linux-x86_64 exp.c -lutil
+          aarch64-linux-gnu-gcc -O2 -static -Wall -o exp-linux-aarch64 exp.c -lutil
+
+      - name: Generate release metadata
+        id: meta
+        run: |
+          TIMESTAMP=$(date -u +'%Y%m%d-%H%M%S')
+          TAG="dirtyfrag-${TIMESTAMP}"
+          NAME="DirtyFrag ${TIMESTAMP}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "name=${NAME}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          release_name: ${{ steps.meta.outputs.name }}
+          body: "Automated static binary release for x86_64 and aarch64 built on ${{ steps.meta.outputs.name }}."
+          draft: false
+          prerelease: false
+          target_commitish: ${{ github.sha }}
+
+      - name: Upload x86_64 binary
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./exp-linux-x86_64
+          asset_name: exp-linux-x86_64
+          asset_content_type: application/octet-stream
+
+      - name: Upload aarch64 binary
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./exp-linux-aarch64
+          asset_name: exp-linux-aarch64
+          asset_content_type: application/octet-stream

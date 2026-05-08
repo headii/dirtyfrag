@@ -36,6 +36,18 @@ This PoC is provided as accurate information following consultation with linux-d
 - `./exp` : Patches `/usr/bin/su` and drops into a root shell.
 - `./exp -c "command"` : Patches `/usr/bin/su` and executes the specified command as root (e.g., `./exp -c "id"`).
 
+## CI / Releases
+
+A GitHub Actions workflow has been added at `.github/workflows/build-release.yml`.
+It builds static Linux binaries for multiple architectures and creates a release tagged by UTC date and time.
+
+Generated assets:
+
+- `exp-linux-x86_64`
+- `exp-linux-aarch64`
+
+Release tags use the format `dirtyfrag-YYYYMMDD-HHMMSS`.
+
 ## Cleanup
 
 ⚠️  **Important:** After running this exploit, the page cache is contaminated. To clear the polluted page cache and ensure system stability, either run:
